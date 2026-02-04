@@ -4,7 +4,7 @@
 
 ```shell
 chmod +x tools/main.py
-ln -s $(pwd)/tools/main.py /usr/local/bin/mpc
+ln -s $(pwd)/tools/main.py /usr/local/bin/mkc
 ```
 
 ## 安装代码依赖
@@ -21,29 +21,29 @@ ln -s $(pwd)/tools/main.py /usr/local/bin/mpc
 例如：
 
 * `k3s_main_01`, `k8s_main_01`
-* `k3s_worker-01`, `k8s_worker_02`
+* `k3s_worker_01`, `k8s_worker_02`
 
 # 操作命令
 
 ```shell
 # 查看所有命令
-python tools/main.py --help
+mkc --help
 
 # 启动所有虚拟机 (先main后worker)
-python tools/main.py start
+mkc start
 
 # 挂起所有虚拟机 (先worker后main)
-python tools/main.py suspend
+mkc suspend
 
 # 关闭所有虚拟机 (先worker后main)
-python tools/main.py stop
+mkc shutdown
 
 # 查看状态
-python tools/main.py status
+mkc status
 
 # 查看main节点状态
-python tools/main.py status --main
+mkc status --main
 
 # 查看worker节点状态
-python tools/main.py status --worker
+mkc status --worker
 ```

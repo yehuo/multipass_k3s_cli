@@ -1,0 +1,147 @@
+# multipass-config.yaml
+# Configuration for creating Multipass virtual machines locally
+
+# Global settings for all VMs (can be overridden per VM)
+global:
+  # Base image to use (Ubuntu LTS versions are recommended)
+  base_image: "22.04"
+  # Default resources for each VM
+  resources:
+    cpus: 2
+    memory: "4G"
+    disk: "20G"
+  # Network settings
+  network:
+    bridged: false  # Set to true to use bridged networking
+    extra_interfaces: []  # Additional network interfaces
+  # Cloud-init configuration file (optional)
+  cloud_init: null
+  # Mount points (optional)
+  mounts: []
+    # - source: "/path/on/host"
+    #   target: "/path/on/guest"
+  # Timezone (optional)
+  timezone: "UTC"
+
+# Virtual machine definitions
+virtual_machines:
+  # Main control plane nodes
+  - name: "k8s-control-plane"
+    type: "main"
+    description: "Kubernetes control plane node"
+    resources:
+      cpus: 4
+      memory: "8G"
+      disk: "30G"
+    image: "jammy"  # Ubuntu 22.04 (overrides global base_image)
+    # Network configuration
+    network:
+      bridged: true
+      # Add additional NICs if needed
+      extra_interfaces: []
+    # Mount host directories (optional)
+    mounts:
+      - source: "~/k8s-config"
+        target: "/home/ubuntu/k8s-config"
+    # Cloud-init configuration (optional)
+    cloud_init: "cloud-init-control.yaml"
+    # Additional multipass launch options
+    extra_options:
+      - "--timezone=America/New_York"
+  
+  # Worker nodes
+  - name: "k8s-worker-01"
+    type: "worker"
+    description: "Kubernetes worker node 01"
+    resources:
+      cpus: 4
+      memory: "8G"
+      disk: "30G"
+    image: "22.04"  # Uses global base_image setting
+    network:
+      bridged: false
+    mounts: []
+    cloud_init: null
+  
+  - name: "k8s-worker-02"
+    type: "worker"
+    description: "Kubernetes worker node 02"
+    resources:
+      cpus: 4
+      memory: "8G"
+      disk: "30G"
+    image: "22.04"
+    network:
+      bridged: false
+    mounts: []
+    cloud_init: null
+
+  # Specialized VM (e.g., for monitoring)
+  - name: "monitoring-node"
+    type: "monitoring"
+    description: "Monitoring and logging node"
+    resources:
+      cpus: 2
+      memory: "4G"
+      disk: "40G"  # Extra disk for logs
+    image: "22.04"
+    network:
+      bridged: false
+    mounts:
+      - source: "~/monitoring-data"
+        target: "/var/lib/monitoring"
+    cloud_init: "cloud-init-monitoring.yaml"
+
+# Cluster settings
+cluster:
+  # SSH key configuration
+  ssh:
+    # Path to SSH public key to inject into all VMs
+    public_key_path: "~/.ssh/id_rsa.pub"
+    # Generate new key pair if none exists
+    generate_if_missing: true
+  
+  # Hostname resolution
+  hosts_file_update: true  # Update /etc/hosts on host machine
+  
+  # Shared configuration
+  shared_config:
+    # Common packages to install on all nodes
+    packages:
+      - "docker.io"
+      - "docker-compose"
+      - "htop"
+      - "net-tools"
+      - "curl"
+      - "wget"
+      - "git"
+      - "vim"
+    
+    # Environment variables to set
+    environment:
+      K8S_VERSION: "1.28"
+      DOCKER_VERSION: "24.0"
+    
+    # Scripts to run after VM creation
+    post_creation_scripts:
+      - "scripts/setup-common.sh"
+      - "scripts/configure-docker.sh"
+
+# Backup and snapshot settings
+backup:
+  # Enable automatic snapshots
+  enable_snapshots: true
+  # Snapshot retention policy
+  retention_days: 7
+  # Snapshot schedule (cron format)
+  schedule: "0 2 * * *"  # Daily at 2 AM
+
+# Resource monitoring
+monitoring:
+  # Enable resource usage tracking
+  enable_monitoring: true
+  # Alert thresholds
+  alerts:
+    cpu_threshold: 80  # percentage
+    memory_threshold: 85  # percentage
+    disk_threshold: 90  # percentage
