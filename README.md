@@ -1,13 +1,21 @@
 # 环境准备
 
+工具是在mac上安装，需要环境中提前安装python3运行环境。
+
 ## 安装multipass
 
 ```shell
-chmod +x tools/main.py
-ln -s $(pwd)/tools/main.py /usr/local/bin/mkc
+brew cask install multipass
+multipass -v
 ```
 
-## 安装代码依赖
+## 部署环境
+
+```shell
+
+chmod +x src/main.py
+ln -s $(pwd)/src/main.py /usr/local/bin/mkc
+```
 
 # k3s 使用规范
 

@@ -44,7 +44,7 @@ os:
     - "vim"
   post_creation_scripts:
     - "scripts/setup-common.sh"
-    - "scripts/configure-docker.sh"
+    - "scripts/setup-docker-proxy.sh"
 
 # Backup and snapshot settings
 backup:
