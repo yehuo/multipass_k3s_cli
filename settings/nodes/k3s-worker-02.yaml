@@ -1,0 +1,12 @@
+nodes:
+  - name: "k3s-worker-02"
+    type: "worker"
+    description: "K3s worker node 02"
+    resources:
+      cpus: 2
+      memory: "2G"
+      disk: "10G"
+    image: "22.04"
+    network:
+      bridged: false
+    mounts: []

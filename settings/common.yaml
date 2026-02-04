@@ -18,47 +18,13 @@ global:
       target: "/path/on/guest"
 
 # Virtual machine definitions, overriding global settings as needed
-nodes:
-  # Main control plane nodes
-  - name: "k3s-main-01"
-    type: "controller"
-    description: "K3s main node 01"
-    resources:
-      cpus: 2
-      memory: "4G"
-      disk: "20G"
-    image: "22.04"
-    network:
-      bridged: false
-    mounts: []
-    cloud_init: null
-  
-  # Worker nodes
-  - name: "k3s-worker-01"
-    type: "worker"
-    description: "K3s worker node 01"
-    resources:
-      cpus: 2
-      memory: "2G"
-      disk: "10G"
-    image: "22.04"
-    network:
-      bridged: false
-    mounts: []
-  - name: "k3s-worker-02"
-    type: "worker"
-    description: "K3s worker node 02"
-    resources:
-      cpus: 2
-      memory: "2G"
-      disk: "10G"
-    image: "22.04"
-    network:
-      bridged: false
-    mounts: []
+inventory:
+  - k3s-main-01: "nodes/k3s-main-01.yaml"
+  - k3s-worker-01: "nodes/k3s-worker-01.yaml"
+  - k3s-worker-02: "nodes/k3s-worker-02.yaml"
 
-# Cluster settings
-os_settings:
+# OS settings
+os:
   ssh:
     public_key_path: "~/.ssh/id_rsa.pub"
     generate_if_missing: true
