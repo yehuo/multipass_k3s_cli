@@ -1,0 +1,87 @@
+# common.yaml
+
+# Common settings for all VMs
+global:
+  base_image: "22.04"
+  # Resource settings: cpu, memory, disk
+  resources:
+    cpus: 2
+    memory: "2G"
+    disk: "10G"
+  # Network settings: bridged or NAT, extra interfaces
+  network:
+    bridged: false
+    extra_interfaces: []
+  # Storage settings: mounts from host to guest
+  mounts:
+    - source: "/path/on/host"
+      target: "/path/on/guest"
+
+# Virtual machine definitions, overriding global settings as needed
+nodes:
+  # Main control plane nodes
+  - name: "k3s-main-01"
+    type: "controller"
+    description: "K3s main node 01"
+    resources:
+      cpus: 2
+      memory: "4G"
+      disk: "20G"
+    image: "22.04"
+    network:
+      bridged: false
+    mounts: []
+    cloud_init: null
+  
+  # Worker nodes
+  - name: "k3s-worker-01"
+    type: "worker"
+    description: "K3s worker node 01"
+    resources:
+      cpus: 2
+      memory: "2G"
+      disk: "10G"
+    image: "22.04"
+    network:
+      bridged: false
+    mounts: []
+  - name: "k3s-worker-02"
+    type: "worker"
+    description: "K3s worker node 02"
+    resources:
+      cpus: 2
+      memory: "2G"
+      disk: "10G"
+    image: "22.04"
+    network:
+      bridged: false
+    mounts: []
+
+# Cluster settings
+os_settings:
+  ssh:
+    public_key_path: "~/.ssh/id_rsa.pub"
+    generate_if_missing: true
+  k3s:
+    k3s_version: "v1.28.4+k3s1"
+    k3s_install_options: ""
+    kubeconfig_path: "~/.kube/config"
+  hosts_file_update: true  # Update /etc/hosts on host machine
+  common_packages:
+    - "docker.io"
+    - "docker-compose"
+    - "htop"
+    - "net-tools"
+    - "curl"
+    - "wget"
+    - "git"
+    - "vim"
+  post_creation_scripts:
+    - "scripts/setup-common.sh"
+    - "scripts/configure-docker.sh"
+
+# Backup and snapshot settings
+backup:
+  enable_snapshots: true  # Enable automatic snapshots
+  retention_days: 7       # Snapshot retention policy
+  schedule: "0 2 * * *"   # Snapshot schedule (cron format): daily at 2 AM
