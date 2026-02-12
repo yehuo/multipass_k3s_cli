@@ -1,20 +1,77 @@
 # 环境准备
 
-工具是在mac上安装，需要环境中提前安装python3开发环境。
+## 系统要求
+- macOS 或 Linux 系统
+- Python 3.8 或更高版本
+- Multipass 虚拟机管理工具
 
-## 安装multipass
+## 安装 Multipass
 
+### macOS (使用 Homebrew)
 ```shell
-brew cask install multipass
-multipass -v
+brew install --cask multipass
+multipass version
 ```
 
-## 部署环境
+### Linux (Ubuntu/Debian)
+```shell
+sudo snap install multipass
+multipass version
+```
+
+## 安装 Python 依赖
+
+### 使用 pip (推荐)
+```shell
+# 创建虚拟环境 (可选但推荐)
+python -m venv venv
+source venv/bin/activate
+
+# 安装依赖包
+pip install -r requirements.txt
+```
+
+### 使用 conda
+```shell
+# 创建 conda 环境
+conda create -n multipass-k3s python=3.8
+conda activate multipass-k3s
+
+# 安装依赖包
+pip install -r requirements.txt
+```
+
+### 手动安装依赖
+```shell
+pip install click PyYAML
+```
+
+## 部署工具
 
 ```shell
-
+# 添加执行权限
 chmod +x src/main.py
+
+# 创建全局命令链接 (可选)
 ln -s $(pwd)/src/main.py /usr/local/bin/mkc
+
+# 验证安装
+mkc --help
+```
+
+## 验证安装
+
+运行以下命令验证所有组件安装正确：
+
+```shell
+# 检查 Multipass
+multipass version
+
+# 检查 Python 依赖
+python -c "import click, yaml; print('Dependencies installed successfully')"
+
+# 检查工具命令
+mkc --help
 ```
 
 # k3s 使用规范

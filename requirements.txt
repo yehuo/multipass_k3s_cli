@@ -1,0 +1,5 @@
+# Multipass K3s CLI Requirements
+
+# Core dependencies
+click>=8.1.0
+PyYAML>=6.0.3

@@ -1,22 +1,3 @@
-
-
-# Common settings for all VMs
-global:
-  base_image: "22.04"
-  # Resource settings: cpu, memory, disk
-  resources:
-    cpus: 2
-    memory: "2G"
-    disk: "10G"
-  # Network settings: bridged or NAT, extra interfaces
-  network:
-    bridged: false
-    extra_interfaces: []
-  # Storage settings: mounts from host to guest
-  mounts:
-    - source: "/path/on/host"
-      target: "/path/on/guest"
-
 # Universal node configuration - these settings apply to all nodes by default
 # Individual node configurations can override these settings
 node_defaults:
