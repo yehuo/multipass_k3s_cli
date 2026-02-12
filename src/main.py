@@ -5,97 +5,8 @@ A tool for managing Multipass virtual machines
 """
 
 import click
-import subprocess
-import json
-import time
-from typing import List, Dict, Tuple
-import sys
-
-
-def run_command(cmd: List[str]) -> Tuple[bool, str]:
-    """Execute a command and return the result"""
-    try:
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            check=False
-        )
-        return result.returncode == 0, result.stdout.strip()
-    except Exception as e:
-        return False, str(e)
-
-
-def get_vm_list() -> List[Dict]:
-    """Get list of all virtual machines"""
-    success, output = run_command(["multipass", "list", "--format", "json"])
-    if not success:
-        click.echo("Error: Unable to get virtual machine list", err=True)
-        return []
-
-    try:
-        data = json.loads(output)
-        return data.get("list", [])
-    except json.JSONDecodeError:
-        click.echo("Error: Unable to parse virtual machine list", err=True)
-        return []
-
-
-def get_vm_list_plain() -> str:
-    """Get raw output from multipass list command"""
-    success, output = run_command(["multipass", "list"])
-    if success:
-        return output
-    return "Error: Unable to get virtual machine status"
-
-
-def filter_vms_by_name(vms: List[Dict], keyword: str) -> List[Dict]:
-    """Filter virtual machines by name keyword"""
-    return [vm for vm in vms if keyword.lower() in vm["name"].lower()]
-
-
-def get_vm_names(vms: List[Dict]) -> List[str]:
-    """Extract names from list of virtual machine dictionaries"""
-    return [vm["name"] for vm in vms]
-
-
-def wait_for_confirmation(message: str) -> bool:
-    """Wait for user confirmation"""
-    return click.confirm(message, default=True)
-
-
-def operate_vms(vm_names: List[str], operation: str, vm_type: str = "") -> bool:
-    """Perform an operation on a group of virtual machines"""
-    if not vm_names:
-        click.echo(f"No {vm_type} nodes found")
-        return True
-
-    click.echo(
-        f"\nPreparing to {operation} {vm_type} nodes: {', '.join(vm_names)}")
-
-    # Map operation to multipass command
-    operation_map = {
-        "start": "start",
-        "suspend": "suspend",
-        "stop": "stop"
-    }
-
-    if operation not in operation_map:
-        click.echo(f"Error: Unsupported operation {operation}", err=True)
-        return False
-
-    cmd = operation_map[operation]
-
-    # Execute command
-    success, output = run_command(["multipass", cmd] + vm_names)
-
-    if success:
-        click.echo(f"✓ Successfully {operation}ed {vm_type} nodes")
-        return True
-    else:
-        click.echo(
-            f"✗ Failed to {operation} {vm_type} nodes: {output}", err=True)
-        return False
+from utils import get_vm_list, filter_vms_by_name, get_vm_names, get_vm_list_plain
+from k3s_operator import start_nodes, suspend_nodes, stop_nodes
 
 
 @click.group()
@@ -107,115 +18,19 @@ def cli():
 @cli.command()
 def start():
     """Start all virtual machines (first main nodes, then worker nodes)"""
-    click.echo("Getting virtual machine list...")
-    vms = get_vm_list()
-
-    if not vms:
-        click.echo("No virtual machines found")
-        return
-
-    # Separate main and worker nodes
-    main_vms = filter_vms_by_name(vms, "main")
-    worker_vms = filter_vms_by_name(vms, "worker")
-
-    # Start main nodes
-    if main_vms:
-        main_names = get_vm_names(main_vms)
-        if not operate_vms(main_names, "start", "main"):
-            return
-
-        # Wait for main nodes to start
-        click.echo("\nWaiting for main nodes to start...")
-        time.sleep(3)
-
-        if not wait_for_confirmation("Main nodes are started. Continue starting worker nodes?"):
-            click.echo("Cancelled starting worker nodes")
-            return
-
-    # Start worker nodes
-    if worker_vms:
-        worker_names = get_vm_names(worker_vms)
-        operate_vms(worker_names, "start", "worker")
-    else:
-        click.echo("No worker nodes found")
-
-    click.echo("\n✅ Start operation completed")
+    start_nodes()
 
 
 @cli.command()
 def suspend():
     """Suspend all virtual machines (first worker nodes, then main nodes)"""
-    click.echo("Getting virtual machine list...")
-    vms = get_vm_list()
-
-    if not vms:
-        click.echo("No virtual machines found")
-        return
-
-    # Separate main and worker nodes
-    main_vms = filter_vms_by_name(vms, "main")
-    worker_vms = filter_vms_by_name(vms, "worker")
-
-    # Suspend worker nodes
-    if worker_vms:
-        worker_names = get_vm_names(worker_vms)
-        if not operate_vms(worker_names, "suspend", "worker"):
-            return
-
-        # Wait for worker nodes to suspend
-        click.echo("\nWaiting for worker nodes to suspend...")
-        time.sleep(2)
-
-        if not wait_for_confirmation("Worker nodes are suspended. Continue suspending main nodes?"):
-            click.echo("Cancelled suspending main nodes")
-            return
-
-    # Suspend main nodes
-    if main_vms:
-        main_names = get_vm_names(main_vms)
-        operate_vms(main_names, "suspend", "main")
-    else:
-        click.echo("No main nodes found")
-
-    click.echo("\n✅ Suspend operation completed")
+    suspend_nodes()
 
 
 @cli.command()
 def stop():
     """Stop all virtual machines (first worker nodes, then main nodes)"""
-    click.echo("Getting virtual machine list...")
-    vms = get_vm_list()
-
-    if not vms:
-        click.echo("No virtual machines found")
-        return
-
-    # Separate main and worker nodes
-    main_vms = filter_vms_by_name(vms, "main")
-    worker_vms = filter_vms_by_name(vms, "worker")
-
-    # Stop worker nodes
-    if worker_vms:
-        worker_names = get_vm_names(worker_vms)
-        if not operate_vms(worker_names, "stop", "worker"):
-            return
-
-        # Wait for worker nodes to stop
-        click.echo("\nWaiting for worker nodes to stop...")
-        time.sleep(2)
-
-        if not wait_for_confirmation("Worker nodes are stopped. Continue stopping main nodes?"):
-            click.echo("Cancelled stopping main nodes")
-            return
-
-    # Stop main nodes
-    if main_vms:
-        main_names = get_vm_names(main_vms)
-        operate_vms(main_names, "stop", "main")
-    else:
-        click.echo("No main nodes found")
-
-    click.echo("\n✅ Stop operation completed")
+    stop_nodes()
 
 
 @cli.command()

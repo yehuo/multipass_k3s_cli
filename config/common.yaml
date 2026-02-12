@@ -1,4 +1,4 @@
-# common.yaml
+
 
 # Common settings for all VMs
 global:
@@ -16,6 +16,31 @@ global:
   mounts:
     - source: "/path/on/host"
       target: "/path/on/guest"
+
+# Universal node configuration - these settings apply to all nodes by default
+# Individual node configurations can override these settings
+node_defaults:
+  # Basic node identification
+  type: "worker"
+  description: "K3s node"
+  
+  # Resource defaults (can be overridden per node)
+  resources:
+    cpus: 2
+    memory: "2G"
+    disk: "10G"
+  
+  # Network defaults
+  network:
+    bridged: false
+    extra_interfaces: []
+  
+  # Storage defaults
+  mounts: []
+  
+  # Image and cloud-init defaults
+  image: "22.04"
+  cloud_init: null
 
 # Virtual machine definitions, overriding global settings as needed
 inventory:
