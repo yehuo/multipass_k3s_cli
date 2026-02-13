@@ -1,5 +1,2 @@
-nodes:
-  - name: "k3s-worker-01"
-    # This worker node uses common defaults from common.yaml
-    # No overrides needed - inherits all settings from node_defaults
-    description: "K3s worker node 01"
+- name: "k3s-worker-01"
+  description: "K3s worker node 01"
