@@ -1,5 +1,5 @@
 import utils
-from typing import Dict, String
+from typing import Dict, Optional
 
 class nodeConfig:
     def __init__(self, node_config_path: str) -> None:

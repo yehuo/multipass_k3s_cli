@@ -1,6 +1,6 @@
 # Universal node configuration - these settings apply to all nodes by default
 # Individual node configurations can override these settings
-node_defaults:
+default:
   # Basic node identification
   type: "worker"
   description: "K3s node"
@@ -23,14 +23,8 @@ node_defaults:
   image: "22.04"
   cloud_init: null
 
-# Virtual machine definitions, overriding global settings as needed
-inventory:
-  - k3s-main-01: "nodes/k3s-main-01.yaml"
-  - k3s-worker-01: "nodes/k3s-worker-01.yaml"
-  - k3s-worker-02: "nodes/k3s-worker-02.yaml"
-
 # OS settings
-os:
+system:
   ssh:
     public_key_path: "~/.ssh/id_rsa.pub"
     generate_if_missing: true

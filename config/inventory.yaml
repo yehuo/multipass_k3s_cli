@@ -1,4 +1,0 @@
-inventory:
-  - k3s-main-01: "nodes/k3s-main-01.yaml"
-  - k3s-worker-01: "nodes/k3s-worker-01.yaml"
-  - k3s-worker-02: "nodes/k3s-worker-02.yaml"

@@ -1,8 +1,7 @@
-nodes:
-  - name: "k3s-worker-02"
-    # Partial overrides - only specify what differs from common defaults
-    description: "K3s worker node 02 with custom resources"
-    resources:
-      memory: "4G"  # Double the memory for this worker
-      disk: "15G"   # Additional disk space
-    # type, cpus, image, network, and mounts inherit from common.yaml
+- name: "k3s-worker-02"
+  # Partial overrides - only specify what differs from common defaults
+  description: "K3s worker node 02 with custom resources"
+  resources:
+    memory: "4G"  # Double the memory for this worker
+    disk: "15G"   # Additional disk space
+  # type, cpus, image, network, and mounts inherit from common.yaml

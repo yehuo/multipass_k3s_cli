@@ -1,0 +1,10 @@
+cluster:
+  name: "k3s-cluster"
+  description: "K3s Kubernetes Cluster"
+  node_common_config: "base.yaml"
+  inventory:
+    controller:
+      - k3s-main-01: "nodes/k3s-main-01.yaml"
+    worker:
+      - k3s-worker-01: "nodes/k3s-worker-01.yaml"
+      - k3s-worker-02: "nodes/k3s-worker-02.yaml" 

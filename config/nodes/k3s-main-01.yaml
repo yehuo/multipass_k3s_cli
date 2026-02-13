@@ -1,14 +1,13 @@
-nodes:
-  - name: "k3s-main-01"
-    # Override common defaults for main controller node
-    type: "controller"
-    description: "K3s main controller node 01"
-    resources:
-      cpus: 2
-      memory: "4G"  # More memory for controller
-      disk: "20G"   # More disk space for controller
-    # Other settings inherit from common.yaml node_defaults
-    network:
-      bridged: false
-    mounts: []
-    cloud_init: null
+- name: "k3s-main-01"
+  # Override common defaults for main controller node
+  type: "controller"
+  description: "K3s main controller node 01"
+  resources:
+    cpus: 2
+    memory: "4G"  # More memory for controller
+    disk: "20G"   # More disk space for controller
+  # Other settings inherit from common.yaml node_defaults
+  network:
+    bridged: false
+  mounts: []
+  cloud_init: null
