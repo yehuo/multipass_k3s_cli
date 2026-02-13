@@ -1,7 +1,7 @@
 cluster:
   name: "k3s-cluster"
   description: "K3s Kubernetes Cluster"
-  node_common_config: "base.yaml"
+  node_common_config: "k3s.base.yaml"
   inventory:
     controller:
       - k3s-main-01: "nodes/k3s-main-01.yaml"
