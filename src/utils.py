@@ -74,3 +74,35 @@ def filter_vms_by_name(vms: List[Dict], keyword: str) -> List[Dict]:
 def get_vm_names(vms: List[Dict]) -> List[str]:
     """Extract names from list of virtual machine dictionaries"""
     return [vm["name"] for vm in vms]
+
+
+def deep_merge(base_dict: Dict, override_dict: Dict) -> Dict:
+    """
+    Deep merge two dictionaries. Values from override_dict take precedence.
+    
+    Args:
+        base_dict: Base dictionary to merge into
+        override_dict: Dictionary with values that override base_dict
+        
+    Returns:
+        Merged dictionary
+    """
+    result = base_dict.copy()
+    
+    for key, value in override_dict.items():
+        if (key in result and 
+            isinstance(result[key], dict) and 
+            isinstance(value, dict)):
+            # Recursively merge nested dictionaries
+            result[key] = deep_merge(result[key], value)
+        else:
+            # Override with new value
+            result[key] = value
+    
+    return result
+
+
+def file_exists(file_path: str) -> bool:
+    """Check if a file exists"""
+    import os
+    return os.path.exists(file_path)

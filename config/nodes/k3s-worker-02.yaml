@@ -4,4 +4,4 @@
   resources:
     memory: "4G"  # Double the memory for this worker
     disk: "15G"   # Additional disk space
-  # type, cpus, image, network, and mounts inherit from common.yaml
+  # type, cpus, image, network, and mounts inherit from {cluster_name}.base.yaml

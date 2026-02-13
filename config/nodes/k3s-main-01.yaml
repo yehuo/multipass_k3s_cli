@@ -6,7 +6,7 @@
     cpus: 2
     memory: "4G"  # More memory for controller
     disk: "20G"   # More disk space for controller
-  # Other settings inherit from common.yaml node_defaults
+  # Other settings inherit from {cluster_name}.base.yaml node_defaults
   network:
     bridged: false
   mounts: []

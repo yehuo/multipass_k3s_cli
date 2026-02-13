@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+# Set the Python path to include the src directory
+export PYTHONPATH="/Users/sjxu/scripts/multipass_k3s_cli/src:$PYTHONPATH"
+
+# Run the main CLI tool
+python -m main "$@"

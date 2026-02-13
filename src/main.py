@@ -10,7 +10,7 @@ import yaml
 from pathlib import Path
 from typing import Dict, List, Any
 from utils import get_vm_list, filter_vms_by_name, get_vm_names, get_vm_list_plain, load_config, execute
-from k3s_operator import start_nodes, suspend_nodes, stop_nodes
+from cluster_operator import start_cluster, suspend_cluster, stop_cluster
 
 
 @click.group()
@@ -20,21 +20,24 @@ def cli():
 
 
 @cli.command()
-def start():
-    """Start all virtual machines (first main nodes, then worker nodes)"""
-    start_nodes()
+@click.option('--cluster-type', default='k3s', help='Type of cluster to start (k3s, k8s, etc.)')
+def start(cluster_type):
+    """Start a Kubernetes cluster"""
+    start_cluster(cluster_type)
 
 
 @cli.command()
-def suspend():
-    """Suspend all virtual machines (first worker nodes, then main nodes)"""
-    suspend_nodes()
+@click.option('--cluster-type', default='k3s', help='Type of cluster to suspend (k3s, k8s, etc.)')
+def suspend(cluster_type):
+    """Suspend a Kubernetes cluster"""
+    suspend_cluster(cluster_type)
 
 
 @cli.command()
-def stop():
-    """Stop all virtual machines (first worker nodes, then main nodes)"""
-    stop_nodes()
+@click.option('--cluster-type', default='k3s', help='Type of cluster to stop (k3s, k8s, etc.)')
+def stop(cluster_type):
+    """Stop a Kubernetes cluster"""
+    stop_cluster(cluster_type)
 
 
 def merge_configs(common_config: Dict, node_config: Dict) -> Dict:
@@ -221,7 +224,7 @@ def generate_config_files(common_config: Dict, output_dir: str = "generated") ->
 
 
 @cli.command()
-@click.option('--common-config', '-c', default='config/common.yaml',
+@click.option('--common-config', '-c', default='config/k3s-cluster.base.yaml',
               help='Path to common configuration YAML file')
 @click.option('--dry-run', '-d', is_flag=True,
               help='Show commands without executing')
