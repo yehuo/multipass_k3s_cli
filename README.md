@@ -1,6 +1,7 @@
 # 环境准备
 
 ## 系统要求
+
 - macOS 或 Linux 系统
 - Python 3.8 或更高版本
 - Multipass 虚拟机管理工具
@@ -8,12 +9,14 @@
 ## 安装 Multipass
 
 ### macOS (使用 Homebrew)
+
 ```shell
 brew install --cask multipass
 multipass version
 ```
 
 ### Linux (Ubuntu/Debian)
+
 ```shell
 sudo snap install multipass
 multipass version
@@ -22,6 +25,7 @@ multipass version
 ## 安装 Python 依赖
 
 ### 使用 pip (推荐)
+
 ```shell
 # 创建虚拟环境 (可选但推荐)
 python -m venv venv
@@ -32,6 +36,7 @@ pip install -r requirements.txt
 ```
 
 ### 使用 conda
+
 ```shell
 # 创建 conda 环境
 conda create -n multipass-k3s python=3.8
@@ -42,6 +47,7 @@ pip install -r requirements.txt
 ```
 
 ### 手动安装依赖
+
 ```shell
 pip install click PyYAML
 ```
@@ -50,10 +56,10 @@ pip install click PyYAML
 
 ```shell
 # 添加执行权限
-chmod +x src/main.py
+chmod +x mkc
 
 # 创建全局命令链接 (可选)
-ln -s $(pwd)/src/main.py /usr/local/bin/mkc
+sudo ln -s $(pwd)/mkc /usr/local/bin/mkc
 
 # 验证安装
 mkc --help
@@ -80,8 +86,8 @@ mkc --help
 
 为了使工具正常工作，虚拟机名称需要包含以下关键词：
 
-* **main节点** ：名称中包含 "main"（不区分大小写）
-* **worker节点** ：名称中包含 "worker"（不区分大小写）
+* **controller节点** ：名称中包含 "main"（todo：更新为controller yaml中定义的节点）
+* **worker节点** ：名称中包含 "worker"（todo：更新为worker yaml中定义的节点）
 
 例如：
 
@@ -94,31 +100,23 @@ mkc --help
 # 查看所有命令
 mkc --help
 
-# 启动所有虚拟机 (先main后worker)
-mkc start
+# 启动 Kubernetes 集群
+mkc start --cluster-type k3s
 
-# 挂起所有虚拟机 (先worker后main)
-mkc suspend
+# 挂起 Kubernetes 集群
+mkc suspend --cluster-type k3s
 
-# 关闭所有虚拟机 (先worker后main)
-mkc shutdown
+# 停止 Kubernetes 集群
+mkc stop --cluster-type k3s
 
-# 查看状态
+# 查看虚拟机状态
 mkc status
 
-# 查看main节点状态
-mkc status --main
-
-# 查看worker节点状态
-mkc status --worker
-
-# 配置管理命令
-python src/provisioner_v2.py --generate  # 生成配置到 generated/ 目录
-python src/provisioner_v2.py --dry-run    # 预览创建命令
-python src/provisioner_v2.py              # 实际创建虚拟机
-
-# 使用增强的配置器
-python src/provisioner_v2.py --help       # 查看所有选项
+# 初始化虚拟机配置
+mkc init --help
+mkc init --dry-run    # 预览创建命令
+mkc init --generate    # 生成配置到 generated/ 目录
+mkc init              # 实际创建虚拟机
 
 # 🆕 新增功能特性
 
@@ -164,6 +162,7 @@ inventory:
 ```
 
 #### config/nodes/k3s-main-01.yaml - 节点特定配置
+
 ```yaml
 nodes:
   - name: "k3s-main-01"
@@ -177,6 +176,7 @@ nodes:
 ```
 
 #### config/nodes/k3s-worker-02.yaml - 部分覆盖示例
+
 ```yaml
 nodes:
   - name: "k3s-worker-02"
@@ -188,59 +188,56 @@ nodes:
     # type, cpus, image, network, mounts 继承自 common.yaml
 ```
 
-## 增强的配置器功能
-
-### 配置生成
-```bash
-# 生成所有节点的合并配置到 generated/ 目录
-python src/provisioner_v2.py --generate
-
-# 指定输出目录
-python src/provisioner_v2.py --generate --output-dir my-configs
-```
-
-### 预览模式
-```bash
-# 预览将要执行的 multipass 命令
-python src/provisioner_v2.py --dry-run
-```
-
-### 实际创建
-```bash
-# 使用合并后的配置创建虚拟机
-python src/provisioner_v2.py
-```
-
 ## 模块化架构
 
-项目现在采用模块化设计：
+项目采用面向对象的模块化设计：
 
 ### src/main.py
-- CLI 主入口程序
-- 调用其他模块功能
-- 保持简洁的接口
 
-### src/utils.py
-- 通用工具函数
-- `run_command`: 执行任意命令
-- `get_vm_list`: 获取虚拟机列表
+- CLI 前端入口程序
+- 仅包含 Click 命令行接口
+- 调用操作器模块执行实际功能
+
+### src/utils.py 通用函数
+
+- `run_command`: 执行系统命令
 - `load_config`: 加载 YAML 配置
+- `deep_merge`: 深度字典合并
+- `file_exists`: 检查文件存在
 
-### src/k3s_operator.py
-- 节点管理功能
-- `start_nodes`: 启动所有节点
-- `stop_nodes`: 停止所有节点
-- `suspend_nodes`: 挂起所有节点
+### src/node_operator.py 节点操作（目前仅支持multipass vm）
 
-### src/provisioner_v2.py
-- 增强的配置器
-- 配置合并功能
-- Multipass 集成
-- 配置文件生成
+- `create_node`: 创建虚拟机节点
+- `delete_node`: 删除虚拟机节点
+- `get_node_info`: 获取节点信息
+- `get_node_status`: 检查节点状态
+- `execute_on_node`: 在节点上执行命令
+
+### src/cluster_operator.py 集群操作（目前仅支持k3s）
+
+- `start_cluster`: 启动 Kubernetes 集群
+- `suspend_cluster`: 挂起 Kubernetes 集群
+- `stop_cluster`: 停止 Kubernetes 集群
+- 支持多种集群类型（k3s、k8s 等）
+
+### model/node.py
+
+- Node 数据类
+- 配置继承和合并功能
+- 自动生成配置文件
+- 节点状态管理
+
+### model/cluster.py
+
+- Cluster 数据类
+- 集群资源计算
+- 节点清单管理
+- 集群状态监控
 
 ## 配置继承示例
 
 以 `k3s-worker-02` 节点为例：
+
 - **继承自 common.yaml**: CPU 2核, 内存 2G, 磁盘 10G, Ubuntu 22.04
 - **覆盖配置**: 内存增加到 4G, 磁盘增加到 15G
 - **结果**: 使用 2核 CPU, 4G 内存, 15G 磁盘, Ubuntu 22.04
@@ -263,4 +260,7 @@ python src/provisioner_v2.py
 6. **管理节点**: 使用 `mkc start|stop|status` 命令
 
 这个新的配置系统让您能够轻松管理复杂的多节点环境，同时保持配置的简洁性和一致性。
+
+```
+
 ```
